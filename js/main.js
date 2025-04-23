@@ -1,5 +1,7 @@
-import {PHOTO_COUNT} from './data.js';
-import {generatePhotoMeta} from './photos.js';
+import { generatePhotos } from './photos.js';
+import { renderThumbnails } from './ui.js';
 
-const photos = Array.from({ length: PHOTO_COUNT }, (_, i) => generatePhotoMeta(i + 1));
-console.log(photos);
+const photos = generatePhotos(25);
+renderThumbnails(photos);
+
+export { photos };

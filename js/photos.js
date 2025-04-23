@@ -23,4 +23,8 @@ const generatePhotoMeta = (id) => {
   };
 };
 
-export {generatePhotoMeta};
+const generatePhotos = function(count) {
+  return Array.from({ length: count }, (_, i) => generatePhotoMeta(i + 1));
+};
+
+export { generatePhotoMeta, generatePhotos };
