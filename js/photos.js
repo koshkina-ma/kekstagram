@@ -9,14 +9,14 @@ const generatePhotoMeta = (id) => {
 
   const comments = Array.from({ length: commentCount }, () => ({
     id: commentIdCounter++,
-    avatar: 'img/avatar' + getRandomInt(1, 6) + '.svg',
+    avatar: `img/avatar-${getRandomInt(1, 6)}.svg`,
     message: getRandomArrayElement(COMMENT_MESSAGES),
     name: getRandomArrayElement(COMMENTER_NAMES)
   }));
 
   return {
     id: id,
-    url: 'photos/' + id + '.jpg',
+    url: `photos/${id}.jpg`,
     description: getRandomArrayElement(PHOTO_DESCRIPTIONS),
     likes: getRandomInt(15, 200),
     comments: comments
