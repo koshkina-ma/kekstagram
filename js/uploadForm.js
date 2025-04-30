@@ -1,14 +1,55 @@
-/* eslint-disable */
-const uploadForm = document.querySelector('.img-upload__form');
-const uploadInput = uploadForm.querySelector('#upload-file');
-const editForm = uploadForm.querySelector('.img-upload__overlay');
-const closeButton = uploadForm.querySelector('#upload-cancel');
+import { validateForm, resetValidation } from './validateForm.js';
 
-//Обработчик загрузки изображения
-const onUploadInputChange = () => {
-  editForm.classList.remove('hidden');
-  document.body.classList.add('modal-open');
+const uploadInput   = document.querySelector('#upload-file');
+const uploadOverlay = document.querySelector('.img-upload__overlay');
+const formElement   = document.querySelector('.img-upload__form');
+const cancelButton  = uploadOverlay.querySelector('#upload-cancel');
+const hashtagsInput = formElement.querySelector('.text__hashtags');
+const commentInput  = formElement.querySelector('.text__description');
+const body          = document.body;
+
+// Закрытие формы
+const closeUploadForm = () => {
+  uploadOverlay.classList.add('hidden');
+  body.classList.remove('modal-open');
+  formElement.reset();
+  uploadInput.value = '';
+  resetValidation();
+  document.removeEventListener('keydown', onDocumentKeydown);
 };
 
-uploadInput.addEventListener('change', onUploadInputChange);
+// Обработчик Escape
+function onDocumentKeydown(evt) {
+  if (evt.key === 'Escape') {
+    evt.preventDefault();
+    closeUploadForm();
+  }
+}
 
+// Открытие формы
+const openUploadForm = () => {
+  uploadOverlay.classList.remove('hidden');
+  body.classList.add('modal-open');
+  document.addEventListener('keydown', onDocumentKeydown);
+};
+
+// Чтобы Esc не закрывал форму при вводе
+hashtagsInput.addEventListener('keydown', (evt) => evt.stopPropagation());
+commentInput.addEventListener('keydown',  (evt) => evt.stopPropagation());
+
+// Слушатели
+uploadInput.addEventListener('change', () => {
+  openUploadForm();
+});
+
+cancelButton.addEventListener('click', (evt) => {
+  evt.preventDefault();
+  closeUploadForm();
+});
+
+// Валидация на сабмите
+formElement.addEventListener('submit', (evt) => {
+  if (!validateForm()) {
+    evt.preventDefault();
+  }
+});
