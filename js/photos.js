@@ -5,7 +5,7 @@ let commentIdCounter = 1;
 
 const generatePhotoMeta = (id) => {
 
-  const commentCount = getRandomInt(1, 5);
+  const commentCount = getRandomInt(1, 15);
 
   const comments = Array.from({ length: commentCount }, () => ({
     id: commentIdCounter++,
