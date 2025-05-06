@@ -1,6 +1,7 @@
 import './scaleImage.js';
 import { resetScale } from './scaleImage.js';
-//import './effectsSlider.js';
+import './effectsSlider.js';
+import { resetEffects } from './effectsSlider.js';
 import { validateForm, resetValidation } from './validateForm.js';
 
 const uploadInput   = document.querySelector('#upload-file');
@@ -32,6 +33,7 @@ function onDocumentKeydown(evt) {
 // Открытие формы
 const openUploadForm = () => {
   resetScale();
+  resetEffects();
   uploadOverlay.classList.remove('hidden');
   body.classList.add('modal-open');
   document.addEventListener('keydown', onDocumentKeydown);
