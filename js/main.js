@@ -1,10 +1,16 @@
-import { generatePhotos } from './photos.js';
-import { renderThumbnails } from './ui.js';
+/* eslint-disable */
+
 import './uploadForm.js';
+import { getData } from './api.js';
+import { renderThumbnails } from './ui.js';
+import { showErrorMessage } from './error-message.js';
 
 
-const photos = generatePhotos(25);
-renderThumbnails(photos);
 
-
-export { photos };
+getData()
+  .then((photos) => {
+    renderThumbnails(photos);
+  })
+  .catch(() => {
+    showErrorMessage();
+  });
