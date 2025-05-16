@@ -1,132 +1,127 @@
-import './scaleImage.js';
-import { resetScale } from './scaleImage.js';
-
-import './effectsSlider.js';
-import { resetEffects } from './effectsSlider.js';
-
-import { validateForm, resetValidation } from './validateForm.js';
-
-const uploadInput   = document.querySelector('#upload-file');
+const uploadInput = document.querySelector('#upload-file');
 const uploadOverlay = document.querySelector('.img-upload__overlay');
-const formElement   = document.querySelector('.img-upload__form');
-const cancelButton  = uploadOverlay.querySelector('#upload-cancel');
-const hashtagsInput = formElement.querySelector('.text__hashtags');
-const commentInput  = formElement.querySelector('.text__description');
-const body          = document.body;
+const uploadCancel = document.querySelector('#upload-cancel');
+const previewImage = uploadOverlay.querySelector('.img-upload__preview img');
+const scaleControlValue = uploadOverlay.querySelector('.scale__control--value');
+const scaleSmaller = uploadOverlay.querySelector('.scale__control--smaller');
+const scaleBigger = uploadOverlay.querySelector('.scale__control--bigger');
+const effectsRadios = uploadOverlay.querySelectorAll('.effects__radio');
+const effectLevelSlider = uploadOverlay.querySelector('.effect-level__slider');
+const effectLevelValue = uploadOverlay.querySelector('.effect-level__value');
 
-const submitButton  = formElement.querySelector('.img-upload__submit');
+function openUploadForm() {
+  uploadOverlay.classList.remove('hidden');
+  document.body.classList.add('modal-open');
 
-// шаблоны для сообщений
-const successTemplate = document.querySelector('#success').content.querySelector('.success');
-const errorTemplate   = document.querySelector('#error').content.querySelector('.error');
-
-// универсальный показ сообщения
-const showMessage = (template) => {
-  const message = template.cloneNode(true);
-  document.body.appendChild(message);
-
-  const onEscKeydown = (evt) => {
-    if (evt.key === 'Escape') {
-      evt.preventDefault();
-      closeMessage();
-    }
-  };
-
-  const onOutsideClick = (evt) => {
-    if (!evt.target.closest('div')) {
-      closeMessage();
-    }
-  };
-
-  function closeMessage() {
-    message.remove();
-    document.removeEventListener('keydown', onEscKeydown);
-    message.removeEventListener('click', onOutsideClick);
-  }
-
-  message.querySelector('button').addEventListener('click', closeMessage);
-  document.addEventListener('keydown', onEscKeydown);
-  message.addEventListener('click', onOutsideClick);
-
-};
-
-// сброс формы
-const resetForm = () => {
-  formElement.reset();
   resetScale();
   resetEffects();
-  resetValidation();
-  uploadInput.value = '';
-};
+  initEffectSlider();
+}
 
-// закрытие формы
-const closeUploadForm = () => {
+function closeUploadForm() {
   uploadOverlay.classList.add('hidden');
-  body.classList.remove('modal-open');
-  resetForm();
-  document.removeEventListener('keydown', onDocumentKeydown);
-};
+  document.body.classList.remove('modal-open');
 
-// закрытие по Escape
-function onDocumentKeydown(evt) {
-  if (evt.key === 'Escape') {
-    evt.preventDefault();
-    closeUploadForm();
+  uploadInput.value = '';
+}
+
+function resetScale() {
+  scaleControlValue.value = '100%';
+  previewImage.style.transform = 'scale(1)';
+}
+
+function changeScale(delta) {
+  let currentScale = parseInt(scaleControlValue.value, 10);
+  currentScale = Math.min(100, Math.max(25, currentScale + delta));
+  scaleControlValue.value = `${currentScale}%`;
+  previewImage.style.transform = `scale(${currentScale / 100})`;
+}
+
+function resetEffects() {
+  effectsRadios.forEach((radio) => {
+    if (radio.value === 'none') {radio.checked = true;}
+  });
+  previewImage.style.filter = 'none';
+  effectLevelSlider.style.display = 'none';
+}
+
+function applyEffect(effect, value = 100) {
+  effectLevelValue.value = value;
+  switch (effect) {
+    case 'none':
+      previewImage.style.filter = 'none';
+      effectLevelSlider.style.display = 'none';
+      break;
+    case 'chrome': // grayscale
+      previewImage.style.filter = `grayscale(${value / 100})`;
+      effectLevelSlider.style.display = '';
+      break;
+    case 'sepia':
+      previewImage.style.filter = `sepia(${value / 100})`;
+      effectLevelSlider.style.display = '';
+      break;
+    case 'marvin': // invert
+      previewImage.style.filter = `invert(${value}%)`;
+      effectLevelSlider.style.display = '';
+      break;
+    case 'phobos': // blur
+      previewImage.style.filter = `blur(${(value * 3) / 100}px)`;
+      effectLevelSlider.style.display = '';
+      break;
+    case 'heat': // brightness
+      previewImage.style.filter = `brightness(${1 + (value * 2) / 100})`;
+      effectLevelSlider.style.display = '';
+      break;
   }
 }
 
-// открытие формы
-const openUploadForm = () => {
-  resetScale();
-  resetEffects();
-  uploadOverlay.classList.remove('hidden');
-  body.classList.add('modal-open');
-  document.addEventListener('keydown', onDocumentKeydown);
-};
+function initEffectSlider() {
+  // Предполагаем, что используешь noUiSlider
+  if (window.noUiSlider && effectLevelSlider.noUiSlider) {
+    effectLevelSlider.noUiSlider.on('update', (values, handle) => {
+      const currentEffect = [...effectsRadios].find((r) => r.checked).value;
+      applyEffect(currentEffect, Math.round(values[handle]));
+    });
+  }
+}
 
-// не закрывать при вводе
-hashtagsInput.addEventListener('keydown', (evt) => evt.stopPropagation());
-commentInput.addEventListener('keydown',  (evt) => evt.stopPropagation());
-
-// выбор файла
 uploadInput.addEventListener('change', () => {
+  const file = uploadInput.files[0];
+  if (file) {
+    previewImage.src = URL.createObjectURL(file);
+  }
   openUploadForm();
 });
 
-// кнопка отмены
-cancelButton.addEventListener('click', (evt) => {
-  evt.preventDefault();
+uploadCancel.addEventListener('click', () => {
   closeUploadForm();
 });
 
-// отправка формы
-formElement.addEventListener('submit', (evt) => {
-  evt.preventDefault();
+scaleSmaller.addEventListener('click', () => changeScale(-25));
+scaleBigger.addEventListener('click', () => changeScale(25));
 
-  if (!validateForm()) {
-    return;
-  }
-
-  submitButton.disabled = true;
-
-  const formData = new FormData(formElement);
-
-  fetch('https://25.javascript.htmlacademy.pro/kekstagram', {
-    method: 'POST',
-    body: formData,
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error('Ошибка отправки');
-      }
-      closeUploadForm();
-      showMessage(successTemplate);
-    })
-    .catch(() => {
-      closeUploadForm();
-      showMessage(errorTemplate);
-    })
-    .finally(() => {
-      submitButton.disabled = false;
-    });
+effectsRadios.forEach((radio) => {
+  radio.addEventListener('change', () => {
+    const effect = radio.value;
+    if (effect === 'none') {
+      applyEffect('none');
+    } else {
+      effectLevelSlider.style.display = '';
+      effectLevelSlider.noUiSlider.set(100);
+      applyEffect(effect, 100);
+    }
+  });
 });
+
+// Инициализация слайдера noUiSlider (если используешь его)
+if (window.noUiSlider) {
+  noUiSlider.create(effectLevelSlider, {
+    range: { min: 0, max: 100 },
+    start: 100,
+    step: 1,
+    connect: 'lower',
+  });
+  effectLevelSlider.style.display = 'none'; // Скрыть слайдер по умолчанию
+}
+
+export { openUploadForm, closeUploadForm };
