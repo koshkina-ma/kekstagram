@@ -5,6 +5,9 @@ const renderThumbnails = function (photos) {
   const template = document.querySelector('#picture');
   const fragment = document.createDocumentFragment();
 
+  // Удаляем старые миниатюры перед добавлением новых
+  container.querySelectorAll('.picture').forEach((el) => el.remove());
+
   photos.forEach((photo) => {
     const photoElement = template.content.cloneNode(true);
     photoElement.querySelector('.picture__img').src = photo.url;
